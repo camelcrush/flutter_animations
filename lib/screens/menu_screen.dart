@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animations/screens/emplicit_animations_scree.dart';
+import 'package:flutter_animations/screens/implicit_animations_scree.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
