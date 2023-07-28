@@ -17,7 +17,10 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
     vsync: this,
     duration: const Duration(seconds: 2),
     reverseDuration: const Duration(seconds: 1),
-  );
+  )..addListener(() {
+      // Animation 값이 변할 때, ValueNotifier에 값을 전달
+      _range.value = _animationController.value;
+    });
 
   // Animation Valu를 만들어서 Controller에 연결해주기
   late final Animation<Color?> _color =
@@ -68,6 +71,16 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  // state 값을 갖는 위젯으로 값이 변할때마다 전체 UI를 새로 빌드하지 않고도 알려주는 위젯
+  final ValueNotifier<double> _range = ValueNotifier(0.0);
+
+  void _onChanged(double value) {
+    // Slider의 값을 직접 드래그하여 변경할 때, value를 AnimationController에 저장
+    _animationController.value = value;
+    // animateTo를 통해 슬라이더 바를 움직이면 animation도 동작함
+    // _animationController.animateTo(value);
   }
 
   @override
@@ -127,7 +140,18 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
                   child: const Text("Rewind"),
                 )
               ],
-            )
+            ),
+            const SizedBox(height: 50),
+            ValueListenableBuilder(
+              // Value가 변할 떄마다 빌드해주는 위젯
+              valueListenable: _range,
+              builder: (context, value, child) {
+                return Slider(
+                  value: value,
+                  onChanged: _onChanged,
+                );
+              },
+            ),
           ],
         ),
       ),
