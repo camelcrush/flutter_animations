@@ -16,12 +16,12 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
   late final AnimationController _animationController = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 2),
+    reverseDuration: const Duration(seconds: 1),
   );
 
   // Animation Valu를 만들어서 Controller에 연결해주기
   late final Animation<Color?> _color =
-      ColorTween(begin: Colors.amber, end: Colors.red)
-          .animate(_animationController);
+      ColorTween(begin: Colors.amber, end: Colors.red).animate(_curve);
 
   late final Animation<Decoration> _decoration = DecorationTween(
     begin: BoxDecoration(
@@ -32,18 +32,25 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
       color: Colors.red,
       borderRadius: BorderRadius.circular(120),
     ),
-  ).animate(_animationController);
+  ).animate(_curve);
 
   late final Animation<double> _rotation =
-      Tween(begin: 0.0, end: 2.0).animate(_animationController);
+      Tween(begin: 0.0, end: 0.5).animate(_curve);
 
   late final Animation<double> _scale =
-      Tween(begin: 1.0, end: 1.1).animate(_animationController);
+      Tween(begin: 1.0, end: 1.1).animate(_curve);
 
   late final Animation<Offset> _position = Tween(
     begin: Offset.zero,
     end: const Offset(0, -0.2),
-  ).animate(_animationController);
+  ).animate(_curve);
+
+  // CurvedAnimation을 AnimationController에 연결하면 나머지 Animation들을 _curve로 연결
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.elasticOut,
+    reverseCurve: Curves.bounceInOut,
+  );
 
   void _play() {
     _animationController.forward();
