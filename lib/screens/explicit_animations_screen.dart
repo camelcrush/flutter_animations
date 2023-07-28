@@ -21,6 +21,13 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
       // Animation 값이 변할 때, ValueNotifier에 값을 전달
       _range.value = _animationController.value;
     });
+  // ..addStatusListener((status) {
+  //   if (status == AnimationStatus.completed) {
+  //     _animationController.reverse();
+  //   } else if (status == AnimationStatus.dismissed) {
+  //     _animationController.forward();
+  //   }
+  // });
 
   // Animation Valu를 만들어서 Controller에 연결해주기
   late final Animation<Color?> _color =
@@ -83,6 +90,19 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
     // _animationController.animateTo(value);
   }
 
+  bool _looping = false;
+
+  void _toggleLopping() {
+    if (_looping) {
+      _animationController.stop();
+    } else {
+      _animationController.repeat(reverse: true);
+    }
+    setState(() {
+      _looping = !_looping;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     print("build");
@@ -138,6 +158,10 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
                 ElevatedButton(
                   onPressed: _rewind,
                   child: const Text("Rewind"),
+                ),
+                ElevatedButton(
+                  onPressed: _toggleLopping,
+                  child: Text(_looping ? "Stop loop" : "Start loop"),
                 )
               ],
             ),
