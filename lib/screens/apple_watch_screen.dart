@@ -14,12 +14,35 @@ class _AppleWatchScreenState extends State<AppleWatchScreen>
   late final AnimationController _animationController = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 2),
-    lowerBound: 0.005,
-    upperBound: 2.0,
+  )..forward();
+
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.bounceOut,
   );
 
+  late Animation<double> _progress = Tween(
+    begin: 0.005,
+    end: 1.5,
+  ).animate(_curve);
+
   void _animationValues() {
-    _animationController.forward();
+    final newBegin = _progress.value;
+    final newEnd = Random().nextDouble() * 2.0;
+    setState(() {
+      _progress = Tween(
+        begin: newBegin,
+        end: newEnd,
+      ).animate(_curve);
+    });
+    // AnimationController value가 1로 끝나기 때문에 다시 0으로 세팅해줘야 애니메이션 작동
+    _animationController.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,11 +56,11 @@ class _AppleWatchScreenState extends State<AppleWatchScreen>
       ),
       body: Center(
         child: AnimatedBuilder(
-          animation: _animationController,
+          animation: _progress,
           builder: (context, child) {
             return CustomPaint(
               painter: AppleWatchPainter(
-                progress: _animationController.value,
+                progress: _progress.value,
               ),
               // canvas 사이즈 설정
               size: const Size(400, 400),
