@@ -23,6 +23,28 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
       ColorTween(begin: Colors.amber, end: Colors.red)
           .animate(_animationController);
 
+  late final Animation<Decoration> _decoration = DecorationTween(
+    begin: BoxDecoration(
+      color: Colors.amber,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    end: BoxDecoration(
+      color: Colors.red,
+      borderRadius: BorderRadius.circular(120),
+    ),
+  ).animate(_animationController);
+
+  late final Animation<double> _rotation =
+      Tween(begin: 0.0, end: 2.0).animate(_animationController);
+
+  late final Animation<double> _scale =
+      Tween(begin: 1.0, end: 1.1).animate(_animationController);
+
+  late final Animation<Offset> _position = Tween(
+    begin: Offset.zero,
+    end: const Offset(0, -0.2),
+  ).animate(_animationController);
+
   void _play() {
     _animationController.forward();
   }
@@ -36,6 +58,12 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
   }
 
   @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     print("build");
     return Scaffold(
@@ -46,18 +74,36 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // AnimatedBuilder : AnimationController가 변하는동안 UI에 표시해주는 특수한 빌더
-            // child 위젯만 state를 업데이트 해줌
-            AnimatedBuilder(
-              animation: _color,
-              builder: (context, child) {
-                return Container(
-                  color: _color.value,
-                  width: 400,
-                  height: 400,
-                );
-              },
+            SlideTransition(
+              position: _position,
+              child: ScaleTransition(
+                scale: _scale,
+                child: RotationTransition(
+                  turns: _rotation,
+                  child: DecoratedBoxTransition(
+                    decoration: _decoration,
+                    child: const SizedBox(
+                      width: 300,
+                      height: 300,
+                    ),
+                  ),
+                ),
+              ),
             ),
+            // // xxTransition 위젯이 없을 경우 AnimatedBuilder를 사용해아함
+            // // AnimatedBuilder : AnimationController가 변하는동안 UI에 표시해주는 특수한 빌더
+            // // child 위젯만 state를 업데이트 해줌(오직 하나의 Child에서만 적용)
+            // AnimatedBuilder(
+            //   animation: _color,
+            //   builder: (context, child) {
+            //     return Container(
+            //       color: _color.value,
+            //       width: 400,
+            //       height: 400,
+            //     );
+            //   },
+            // ),
+            const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
