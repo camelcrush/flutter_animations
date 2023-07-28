@@ -9,7 +9,19 @@ class AppleWatchScreen extends StatefulWidget {
   State<AppleWatchScreen> createState() => _AppleWatchScreenState();
 }
 
-class _AppleWatchScreenState extends State<AppleWatchScreen> {
+class _AppleWatchScreenState extends State<AppleWatchScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 2),
+    lowerBound: 0.005,
+    upperBound: 2.0,
+  );
+
+  void _animationValues() {
+    _animationController.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,17 +32,35 @@ class _AppleWatchScreenState extends State<AppleWatchScreen> {
         title: const Text("Apple Watch"),
       ),
       body: Center(
-          child: CustomPaint(
-        painter: AppleWatchPainter(),
-        // canvas 사이즈 설정
-        size: const Size(400, 400),
-      )),
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return CustomPaint(
+              painter: AppleWatchPainter(
+                progress: _animationController.value,
+              ),
+              // canvas 사이즈 설정
+              size: const Size(400, 400),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _animationValues,
+        child: const Icon(Icons.refresh),
+      ),
     );
   }
 }
 
 // CustomPainter
 class AppleWatchPainter extends CustomPainter {
+  final double progress;
+
+  AppleWatchPainter({
+    required this.progress,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(
@@ -93,7 +123,7 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       redArcRect,
       startingAngle,
-      1.5 * pi,
+      progress * pi,
       false,
       redArcPaint,
     );
@@ -113,7 +143,7 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       greenArcRect,
       startingAngle,
-      1.5 * pi,
+      progress * pi,
       false,
       greenArcPaint,
     );
@@ -133,14 +163,16 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       blueArcRect,
       startingAngle,
-      1.5 * pi,
+      progress * pi,
       false,
       blueArcPaint,
     );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant AppleWatchPainter oldDelegate) {
+    // shouldRepaint는 페인팅 도중 문제가 생겼을 시 다시 그릴건지의 여부를 묻는 것이고,
+    // 여기서는 올드버젼의 progress값이 AnimationController의 progress값과 일치하지 않으면 다시 그리라는 의미
+    return oldDelegate.progress != progress;
   }
 }
