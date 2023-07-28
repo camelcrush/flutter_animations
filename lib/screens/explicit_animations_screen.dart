@@ -30,8 +30,8 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
   // });
 
   // Animation Valu를 만들어서 Controller에 연결해주기
-  late final Animation<Color?> _color =
-      ColorTween(begin: Colors.amber, end: Colors.red).animate(_curve);
+  // late final Animation<Color?> _color =
+  //     ColorTween(begin: Colors.amber, end: Colors.red).animate(_curve);
 
   late final Animation<Decoration> _decoration = DecorationTween(
     begin: BoxDecoration(
@@ -105,7 +105,6 @@ class _ExplicitAnimationsScreenState extends State<ExplicitAnimationsScreen>
 
   @override
   Widget build(BuildContext context) {
-    print("build");
     return Scaffold(
       appBar: AppBar(
         title: const Text("Explicit Animations"),
