@@ -21,20 +21,35 @@ class _AppleWatchScreenState extends State<AppleWatchScreen>
     curve: Curves.bounceOut,
   );
 
-  late Animation<double> _progress = Tween(
-    begin: 0.005,
-    end: 1.5,
-  ).animate(_curve);
+  late List<Animation<double>> _progresses = List.generate(
+    3,
+    (index) => Tween(
+      begin: 0.05,
+      end: Random().nextDouble() * 2.0,
+    ).animate(_curve),
+  );
+
+  // late Animation<double> _progress = Tween(
+  //   begin: 0.005,
+  //   end: 1.5,
+  // ).animate(_curve);
 
   void _animationValues() {
-    final newBegin = _progress.value;
-    final newEnd = Random().nextDouble() * 2.0;
-    setState(() {
-      _progress = Tween(
-        begin: newBegin,
-        end: newEnd,
-      ).animate(_curve);
-    });
+    _progresses = List.generate(
+      3,
+      (index) => Tween(
+              begin: _progresses[index].value, end: Random().nextDouble() * 2.0)
+          .animate(_curve),
+    );
+
+    // final newBegin = _progress.value;
+    // final newEnd = Random().nextDouble() * 2.0;
+    // setState(() {
+    //   _progress = Tween(
+    //     begin: newBegin,
+    //     end: newEnd,
+    //   ).animate(_curve);
+    // });
     // AnimationController value가 1로 끝나기 때문에 다시 0으로 세팅해줘야 애니메이션 작동
     _animationController.forward(from: 0);
   }
@@ -56,11 +71,11 @@ class _AppleWatchScreenState extends State<AppleWatchScreen>
       ),
       body: Center(
         child: AnimatedBuilder(
-          animation: _progress,
+          animation: _animationController,
           builder: (context, child) {
             return CustomPaint(
               painter: AppleWatchPainter(
-                progress: _progress.value,
+                progresses: _progresses,
               ),
               // canvas 사이즈 설정
               size: const Size(400, 400),
@@ -78,10 +93,10 @@ class _AppleWatchScreenState extends State<AppleWatchScreen>
 
 // CustomPainter
 class AppleWatchPainter extends CustomPainter {
-  final double progress;
+  final List<Animation<double>> progresses;
 
   AppleWatchPainter({
-    required this.progress,
+    required this.progresses,
   });
 
   @override
@@ -146,7 +161,7 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       redArcRect,
       startingAngle,
-      progress * pi,
+      progresses[0].value * pi,
       false,
       redArcPaint,
     );
@@ -166,7 +181,7 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       greenArcRect,
       startingAngle,
-      progress * pi,
+      progresses[1].value * pi,
       false,
       greenArcPaint,
     );
@@ -186,7 +201,7 @@ class AppleWatchPainter extends CustomPainter {
     canvas.drawArc(
       blueArcRect,
       startingAngle,
-      progress * pi,
+      progresses[2].value * pi,
       false,
       blueArcPaint,
     );
@@ -196,6 +211,7 @@ class AppleWatchPainter extends CustomPainter {
   bool shouldRepaint(covariant AppleWatchPainter oldDelegate) {
     // shouldRepaint는 페인팅 도중 문제가 생겼을 시 다시 그릴건지의 여부를 묻는 것이고,
     // 여기서는 올드버젼의 progress값이 AnimationController의 progress값과 일치하지 않으면 다시 그리라는 의미
-    return oldDelegate.progress != progress;
+    // return oldDelegate.progress != progress;
+    return true;
   }
 }
