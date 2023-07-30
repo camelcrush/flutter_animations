@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class SwipingCardsScreen extends StatefulWidget {
@@ -11,24 +13,36 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
     with SingleTickerProviderStateMixin {
   late final size = MediaQuery.of(context).size;
 
-  late final AnimationController _animationController = AnimationController(
+  late final AnimationController _position = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 2),
+    duration: const Duration(seconds: 1),
     // 기본적으로 AnimationController의 값 범위는 [0,1]이므로 아래와 같이 설정해줘야 함
     upperBound: size.width,
     lowerBound: size.width * -1,
     value: 0,
   );
 
+// Tween : 값의 상하한을 정할 때 사용, 여기서는 animation을 사용하지 않기 때문에 .animate()를 하지않음
+  late final Tween<double> _rotation = Tween(
+    begin: -15,
+    end: 15,
+  );
+
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
-    _animationController.value += details.delta.dx;
+    _position.value += details.delta.dx;
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
-    _animationController.animateTo(
+    _position.animateTo(
       0,
-      curve: Curves.bounceOut,
+      curve: Curves.easeOut,
     );
+  }
+
+  @override
+  void dispose() {
+    _position.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,8 +53,15 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
         title: const Text("Swiping Cards"),
       ),
       body: AnimatedBuilder(
-        animation: _animationController,
+        animation: _position,
         builder: (context, child) {
+          // transform : _position값을 interpolation하여 angle값의 상하한을 결정
+          // _rotation값이 Tween이기 때문에 초기값이 begin인 -15로 초기화 됨
+          // 따라서 아래와 같은 계산식을 통해 angle값을 0으로 초기화하기 위해 추가 보정해야 함
+          final angle = _rotation
+                  .transform((_position.value + size.width / 2) / size.width) *
+              pi /
+              180;
           return Stack(
             children: [
               Align(
@@ -49,13 +70,16 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
                   onHorizontalDragUpdate: _onHorizontalDragUpdate,
                   onHorizontalDragEnd: _onHorizontalDragEnd,
                   child: Transform.translate(
-                    offset: Offset(_animationController.value, 0),
-                    child: Material(
-                      elevation: 10,
-                      color: Colors.red.shade100,
-                      child: SizedBox(
-                        width: size.width * 0.8,
-                        height: size.height * 0.5,
+                    offset: Offset(_position.value, 0),
+                    child: Transform.rotate(
+                      angle: angle,
+                      child: Material(
+                        elevation: 10,
+                        color: Colors.red.shade100,
+                        child: SizedBox(
+                          width: size.width * 0.8,
+                          height: size.height * 0.5,
+                        ),
                       ),
                     ),
                   ),
