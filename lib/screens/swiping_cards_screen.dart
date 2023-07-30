@@ -17,8 +17,8 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
     vsync: this,
     duration: const Duration(seconds: 1),
     // 기본적으로 AnimationController의 값 범위는 [0,1]이므로 아래와 같이 설정해줘야 함
-    upperBound: size.width,
-    lowerBound: size.width * -1,
+    upperBound: (size.width + 100),
+    lowerBound: (size.width + 100) * -1,
     value: 0,
   );
 
@@ -33,10 +33,20 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
-    _position.animateTo(
-      0,
-      curve: Curves.easeOut,
-    );
+    final bound = size.width - 200;
+    final dropZone = size.width + 100;
+    if (_position.value.abs() >= bound) {
+      if (_position.value.isNegative) {
+        _position.animateTo((dropZone) * -1);
+      } else {
+        _position.animateTo(dropZone);
+      }
+    } else {
+      _position.animateTo(
+        0,
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -56,16 +66,19 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
         animation: _position,
         builder: (context, child) {
           // transform : _position값을 interpolation하여 angle값의 상하한을 결정
-          // _rotation값이 Tween이기 때문에 초기값이 begin인 -15로 초기화 됨
+          // 즉, transform(animationValue)에서 animationValue가 0이면 -15, 1이면 15를 반환
+          // AnimationValue를 0~1사이로 만들고 아래와 같이 중간값인 0을 가지기 위해 0으로 만들어주어야 함
           // 따라서 아래와 같은 계산식을 통해 angle값을 0으로 초기화하기 위해 추가 보정해야 함
+          // pi / 180은 래디안으로 변환공식
           final angle = _rotation
                   .transform((_position.value + size.width / 2) / size.width) *
               pi /
               180;
           return Stack(
+            alignment: Alignment.topCenter,
             children: [
-              Align(
-                alignment: Alignment.topCenter,
+              Positioned(
+                top: 100,
                 child: GestureDetector(
                   onHorizontalDragUpdate: _onHorizontalDragUpdate,
                   onHorizontalDragEnd: _onHorizontalDragEnd,
@@ -73,6 +86,7 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
                     offset: Offset(_position.value, 0),
                     child: Transform.rotate(
                       angle: angle,
+                      // angle: angle,
                       child: Material(
                         elevation: 10,
                         color: Colors.red.shade100,
