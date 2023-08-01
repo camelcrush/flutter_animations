@@ -34,12 +34,39 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
     end: 1.0,
   );
 
+  late final Tween<double> _buttonScale = Tween(
+    begin: 1.0,
+    end: 1.1,
+  );
+
+  late final ColorTween _buttonLeftColor = ColorTween(
+    begin: Colors.white,
+    end: Colors.red,
+  );
+
+  late final ColorTween _buttonRightColor = ColorTween(
+    begin: Colors.white,
+    end: Colors.green,
+  );
+
   void _whenComplete() {
     // Animation이 종료되면 value를 0값으로 초기화
     _position.value = 0;
     setState(() {
       _index = _index == 5 ? 1 : _index + 1;
     });
+  }
+
+  void _onDismissCard({required bool left}) {
+    final factor = left ? -1 : 1;
+    final dropZone = size.width + 100;
+    _position
+        .animateTo(
+          dropZone * factor,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        )
+        .whenComplete(_whenComplete);
   }
 
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
@@ -91,6 +118,12 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
               pi /
               180;
           final scale = _scale.transform(_position.value.abs() / size.width);
+          final buttonScale = _buttonScale
+              .transform(_position.value.abs() / (size.width + 100));
+          final buttonLeftColor = _buttonLeftColor
+              .transform(_position.value.abs() / (size.width + 100));
+          final buttonRightColor = _buttonRightColor
+              .transform(_position.value.abs() / (size.width + 100));
           return Stack(
             alignment: Alignment.topCenter,
             children: [
@@ -123,6 +156,78 @@ class _SwipingCardsScreenState extends State<SwipingCardsScreen>
                   ),
                 ),
               ),
+              Positioned(
+                bottom: 120,
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _onDismissCard(left: true),
+                      child: Transform.scale(
+                        scale: _position.value.isNegative ? buttonScale : 1.0,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: _position.value.isNegative
+                                ? buttonLeftColor
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.8),
+                                blurRadius: 5.0,
+                                offset: const Offset(2, 2),
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.close_outlined,
+                            size: 40,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    GestureDetector(
+                      onTap: () => _onDismissCard(left: false),
+                      child: Transform.scale(
+                        scale: _position.value.isNegative ? 1.0 : buttonScale,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: _position.value.isNegative
+                                ? Colors.white
+                                : buttonRightColor,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.8),
+                                blurRadius: 5.0,
+                                offset: const Offset(2, 2),
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.check_outlined,
+                            size: 40,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           );
         },
@@ -147,7 +252,7 @@ class Card extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         clipBehavior: Clip.hardEdge,
         child: SizedBox(
-          width: size.width * 0.8,
+          width: size.width * 0.95,
           height: size.height * 0.6,
           child: Image.asset(
             'assets/covers/$index.jpg',
