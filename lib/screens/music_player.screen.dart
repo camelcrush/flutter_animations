@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animations/screens/music_player_detail.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
   const MusicPlayerScreen({super.key});
@@ -40,6 +41,15 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _onTap(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerDetailScreen(index: index),
+      ),
+    );
   }
 
   @override
@@ -91,25 +101,32 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       final difference = (scroll - index).abs();
                       // scale값은 difference 기준으로 양 옆, 가운데 위젯에 다르게 적용됨
                       final scale = 1 - difference * 0.1;
-                      return Transform.scale(
-                        scale: scale,
-                        child: Container(
-                          height: 350,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image:
-                                  AssetImage("assets/covers/${index + 1}.jpg"),
-                              fit: BoxFit.cover,
+                      return GestureDetector(
+                        onTap: () => _onTap(index + 1),
+                        // Hero : 페이지 이동시 대상 위젯을 그대로 옮겨주는 듯한 애니효과를 줌
+                        child: Hero(
+                          tag: "${index + 1}",
+                          child: Transform.scale(
+                            scale: scale,
+                            child: Container(
+                              height: 350,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                      "assets/covers/${index + 1}.jpg"),
+                                  fit: BoxFit.cover,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.4),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                    offset: const Offset(2, 6),
+                                  )
+                                ],
+                                borderRadius: BorderRadius.circular(20),
+                              ),
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.4),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: const Offset(2, 6),
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                       );
