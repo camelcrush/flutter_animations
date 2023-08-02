@@ -16,10 +16,23 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   );
 
   int _currentPage = 0;
+  // ValueNotifier를 통해 _pageController.value을 저장하고
+  // UI위젯(ValueListenableBuiler)에 해당 value를 사용할 예정.
+  final ValueNotifier<double> _scroll = ValueNotifier(0.0);
 
   void _onChanged(int newPage) {
     setState(() {
       _currentPage = newPage;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // PageController에 Listener를 추가하여 ValueNotifier에 page값을 저장
+    _pageController.addListener(() {
+      if (_pageController.page == null) return;
+      _scroll.value = _pageController.page!;
     });
   }
 
@@ -69,23 +82,38 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    height: 350,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("assets/covers/${index + 1}.jpg"),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(2, 6),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  // ValueListenableBuilder는 화면에 필요한 위젯만 선택적으로 빌드함
+                  ValueListenableBuilder(
+                    valueListenable: _scroll,
+                    builder: (context, scroll, child) {
+                      // scroll(value) : ValueNotifier에 저장된 PageController.page
+                      // scroll값과 현재 index값의 차이
+                      final difference = (scroll - index).abs();
+                      // scale값은 difference 기준으로 양 옆, 가운데 위젯에 다르게 적용됨
+                      final scale = 1 - difference * 0.1;
+                      return Transform.scale(
+                        scale: scale,
+                        child: Container(
+                          height: 350,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image:
+                                  AssetImage("assets/covers/${index + 1}.jpg"),
+                              fit: BoxFit.cover,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.4),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: const Offset(2, 6),
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 30),
                   const Text(
