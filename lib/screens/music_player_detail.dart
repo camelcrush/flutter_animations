@@ -13,7 +13,19 @@ class MusicPlayerDetailScreen extends StatefulWidget {
       _MusicPlayerDetailScreenState();
 }
 
-class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen> {
+class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _progressController = AnimationController(
+    vsync: this,
+    duration: const Duration(minutes: 1),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -54,9 +66,16 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen> {
           const SizedBox(
             height: 50,
           ),
-          CustomPaint(
-            size: Size(size.width - 80, 5),
-            painter: ProgressBar(),
+          AnimatedBuilder(
+            animation: _progressController,
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(size.width - 80, 5),
+                painter: ProgressBar(
+                  progressValue: _progressController.value,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -65,8 +84,15 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen> {
 }
 
 class ProgressBar extends CustomPainter {
+  final double progressValue;
+
+  ProgressBar({
+    required this.progressValue,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
+    final progress = progressValue * size.width;
     // Track
 
     final trackPaint = Paint()
@@ -92,7 +118,7 @@ class ProgressBar extends CustomPainter {
     final progressRRect = RRect.fromLTRBR(
       0,
       0,
-      size.width / 2,
+      progress,
       size.height,
       const Radius.circular(10),
     );
@@ -102,10 +128,7 @@ class ProgressBar extends CustomPainter {
     // thumb
 
     canvas.drawCircle(
-      Offset(
-        size.width / 2,
-        size.height / 2,
-      ),
+      Offset(progress, size.height / 2),
       10,
       progressPaint,
     );
@@ -113,6 +136,6 @@ class ProgressBar extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant ProgressBar oldDelegate) {
-    return false;
+    return oldDelegate.progressValue != progressValue;
   }
 }
