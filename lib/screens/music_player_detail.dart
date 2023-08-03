@@ -21,6 +21,12 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
   )..repeat(reverse: true);
 
   @override
+  void initState() {
+    super.initState();
+    _progressController.stop();
+  }
+
+  @override
   void dispose() {
     _progressController.dispose();
     super.dispose();
@@ -77,6 +83,44 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
               );
             },
           ),
+          const SizedBox(height: 10),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30),
+            child: Row(
+              children: [
+                Text(
+                  "00:00",
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600),
+                ),
+                Spacer(),
+                Text(
+                  "01:00",
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            "Interstellar",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            "A Film By Christopher Nolan - Original Motion Picture Soundtrack",
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+            style: TextStyle(fontSize: 18),
+          )
         ],
       ),
     );
