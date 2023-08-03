@@ -43,11 +43,17 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     super.dispose();
   }
 
-  void _onTap(int index) {
+  void _onTap(int pageIndex) {
+    // PageRouteBuilder : 페이지간 이동에 Animation값을 넣을 수 있는 명시적 위젯
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerDetailScreen(index: index),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return FadeTransition(
+            opacity: animation,
+            child: MusicPlayerDetailScreen(index: pageIndex),
+          );
+        },
       ),
     );
   }
