@@ -15,15 +15,29 @@ class MusicPlayerDetailScreen extends StatefulWidget {
 
 class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
     with SingleTickerProviderStateMixin {
+  final int _totalPlayTime = 80;
+
   late final AnimationController _progressController = AnimationController(
     vsync: this,
-    duration: const Duration(minutes: 1),
+    duration: Duration(seconds: _totalPlayTime),
   )..repeat(reverse: true);
 
-  @override
-  void initState() {
-    super.initState();
-    _progressController.stop();
+  String _formatTime({required double value, required bool reverse}) {
+    int valueToSeconds = (value * 60).floor();
+    int playMinutes = valueToSeconds ~/ 60;
+    int playSeconds = valueToSeconds % 60;
+    int remainPlaytime = _totalPlayTime - valueToSeconds;
+    int remainPlayMinutes = remainPlaytime ~/ 60;
+    int remainPlaySeconds = remainPlaytime % 60;
+    String formattedTitme = "";
+    if (reverse) {
+      formattedTitme =
+          "${(remainPlayMinutes).toString().padLeft(2, '0')}:${remainPlaySeconds.toString().padLeft(2, '0')}";
+    } else {
+      formattedTitme =
+          "${playMinutes.toString().padLeft(2, '0')}:${playSeconds.toString().padLeft(2, '0')}";
+    }
+    return formattedTitme;
   }
 
   @override
@@ -84,26 +98,39 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
             },
           ),
           const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            child: Row(
-              children: [
-                Text(
-                  "00:00",
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600),
-                ),
-                Spacer(),
-                Text(
-                  "01:00",
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: AnimatedBuilder(
+              animation: _progressController,
+              builder: (context, child) {
+                return Row(
+                  children: [
+                    Text(
+                      _formatTime(
+                        value: _progressController.value,
+                        reverse: false,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _formatTime(
+                        value: _progressController.value,
+                        reverse: true,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 20),
