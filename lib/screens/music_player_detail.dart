@@ -14,13 +14,23 @@ class MusicPlayerDetailScreen extends StatefulWidget {
 }
 
 class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final int _totalPlayTime = 80;
 
   late final AnimationController _progressController = AnimationController(
     vsync: this,
     duration: Duration(seconds: _totalPlayTime),
   )..repeat(reverse: true);
+
+  late final AnimationController _marqueeController = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 10),
+  )..repeat(reverse: true);
+
+  late final Animation<Offset> _marqueeTween = Tween(
+    begin: const Offset(0.1, 0),
+    end: const Offset(-0.6, 0),
+  ).animate(_marqueeController);
 
   String _formatTime({required double value, required bool reverse}) {
     int valueToSeconds = (value * 60).floor();
@@ -43,6 +53,7 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
   @override
   void dispose() {
     _progressController.dispose();
+    _marqueeController.dispose();
     super.dispose();
   }
 
@@ -142,11 +153,17 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
             ),
           ),
           const SizedBox(height: 5),
-          const Text(
-            "A Film By Christopher Nolan - Original Motion Picture Soundtrack",
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-            style: TextStyle(fontSize: 18),
+          SlideTransition(
+            position: _marqueeTween,
+            child: const Text(
+              "A Film By Christopher Nolan - Original Motion Picture Soundtrack",
+              maxLines: 1,
+              // TextOverflow.visible : Container를 벗어나는 경우도 표시
+              overflow: TextOverflow.visible,
+              // softWrap: 텍스트가 영역을 넘어갈 경우 줄바꿈 여부
+              softWrap: false,
+              style: TextStyle(fontSize: 18),
+            ),
           )
         ],
       ),
