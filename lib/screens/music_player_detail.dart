@@ -27,6 +27,11 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
     duration: const Duration(seconds: 10),
   )..repeat(reverse: true);
 
+  late final AnimationController _playPauseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 500),
+  );
+
   late final Animation<Offset> _marqueeTween = Tween(
     begin: const Offset(0.1, 0),
     end: const Offset(-0.6, 0),
@@ -54,7 +59,16 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
   void dispose() {
     _progressController.dispose();
     _marqueeController.dispose();
+    _playPauseController.dispose();
     super.dispose();
+  }
+
+  void _onPlayPauseTap() {
+    if (_playPauseController.isCompleted) {
+      _playPauseController.reverse();
+    } else {
+      _playPauseController.forward();
+    }
   }
 
   @override
@@ -163,6 +177,31 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
               // softWrap: 텍스트가 영역을 넘어갈 경우 줄바꿈 여부
               softWrap: false,
               style: TextStyle(fontSize: 18),
+            ),
+          ),
+          const SizedBox(height: 30),
+          GestureDetector(
+            onTap: _onPlayPauseTap,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedIcon(
+                  icon: AnimatedIcons.play_pause,
+                  progress: _playPauseController,
+                  size: 80,
+                ),
+                // LottieBuilder.asset(
+                //   "assets/animations/play-lottie.json",
+                //   controller: _playPauseController,
+                //   width: 200,
+                //   height: 200,
+                //   // onLoaded : 개발자가 의도하는 애니메이션 성질을 반영(필요 시)
+                //   // _반영안해도 무관
+                //   onLoaded: (composition) {
+                //     _playPauseController.duration = composition.duration;
+                //   },
+                // ),
+              ],
             ),
           )
         ],
