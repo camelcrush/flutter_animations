@@ -18,30 +18,65 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
   final int _totalPlayTime = 80;
   late final size = MediaQuery.of(context).size;
 
+  // Progress Animtaion
   late final AnimationController _progressController = AnimationController(
     vsync: this,
     duration: Duration(seconds: _totalPlayTime),
   )..forward();
 
+  // Marquee Animation
   late final AnimationController _marqueeController = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 10),
   )..repeat(reverse: true);
 
+  late final Animation<Offset> _marqueeTween = Tween(
+    begin: const Offset(0.1, 0),
+    end: const Offset(-0.6, 0),
+  ).animate(_marqueeController);
+
+  // Play & Pause Aniamatino
   late final AnimationController _playPauseController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 500),
   );
 
+  // Menu Animation
   late final AnimationController _menuController = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 5),
+    duration: const Duration(seconds: 3),
   );
 
-  late final Animation<Offset> _marqueeTween = Tween(
-    begin: const Offset(0.1, 0),
-    end: const Offset(-0.6, 0),
-  ).animate(_marqueeController);
+  final Curve _menuCurve = Curves.easeInOutCubic;
+
+  late final Animation<double> _screenScale = Tween(
+    begin: 1.0,
+    end: 0.7,
+  ).animate(
+    // CurvedAnimation을 통해 컨트롤러와 Interval을 연결할 수 있음
+    CurvedAnimation(
+      parent: _menuController,
+      curve: Interval(
+        0.0,
+        0.5,
+        curve: _menuCurve,
+      ),
+    ),
+  );
+
+  late final Animation<Offset> _screenOffset = Tween(
+    begin: Offset.zero,
+    end: const Offset(0.5, 0),
+  ).animate(
+    CurvedAnimation(
+      parent: _menuController,
+      curve: Interval(
+        0.5,
+        1,
+        curve: _menuCurve,
+      ),
+    ),
+  );
 
   String _formatTime({required double value, required bool reverse}) {
     int valueToSeconds = (value * 60).floor();
@@ -181,166 +216,173 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
             ],
           ),
         ),
-        Scaffold(
-          appBar: AppBar(
-            title: const Text("Interstella"),
-            actions: [
-              IconButton(
-                onPressed: _openMenu,
-                icon: const Icon(Icons.menu),
+        SlideTransition(
+          position: _screenOffset,
+          child: ScaleTransition(
+            scale: _screenScale,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text("Interstella"),
+                actions: [
+                  IconButton(
+                    onPressed: _openMenu,
+                    icon: const Icon(Icons.menu),
+                  ),
+                ],
               ),
-            ],
-          ),
-          body: Column(
-            children: [
-              const SizedBox(
-                height: 30,
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Hero(
-                  tag: "${widget.index}",
-                  child: Container(
-                    height: 350,
-                    width: 350,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("assets/covers/${widget.index}.jpg"),
-                        fit: BoxFit.cover,
+              body: Column(
+                children: [
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Hero(
+                      tag: "${widget.index}",
+                      child: Container(
+                        height: 350,
+                        width: 350,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image:
+                                AssetImage("assets/covers/${widget.index}.jpg"),
+                            fit: BoxFit.cover,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                              offset: const Offset(2, 6),
+                            )
+                          ],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(2, 6),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 50,
-              ),
-              AnimatedBuilder(
-                animation: _progressController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    size: Size(size.width - 80, 5),
-                    painter: ProgressBar(
-                      progressValue: _progressController.value,
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  AnimatedBuilder(
+                    animation: _progressController,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        size: Size(size.width - 80, 5),
+                        painter: ProgressBar(
+                          progressValue: _progressController.value,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: AnimatedBuilder(
+                      animation: _progressController,
+                      builder: (context, child) {
+                        return Row(
+                          children: [
+                            Text(
+                              _formatTime(
+                                value: _progressController.value,
+                                reverse: false,
+                              ),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              _formatTime(
+                                value: _progressController.value,
+                                reverse: true,
+                              ),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: AnimatedBuilder(
-                  animation: _progressController,
-                  builder: (context, child) {
-                    return Row(
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Interstellar",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  SlideTransition(
+                    position: _marqueeTween,
+                    child: const Text(
+                      "A Film By Christopher Nolan - Original Motion Picture Soundtrack",
+                      maxLines: 1,
+                      // TextOverflow.visible : Container를 벗어나는 경우도 표시
+                      overflow: TextOverflow.visible,
+                      // softWrap: 텍스트가 영역을 넘어갈 경우 줄바꿈 여부
+                      softWrap: false,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: _onPlayPauseTap,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          _formatTime(
-                            value: _progressController.value,
-                            reverse: false,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        AnimatedIcon(
+                          icon: AnimatedIcons.play_pause,
+                          progress: _playPauseController,
+                          size: 80,
                         ),
-                        const Spacer(),
-                        Text(
-                          _formatTime(
-                            value: _progressController.value,
-                            reverse: true,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        // LottieBuilder.asset(
+                        //   "assets/animations/play-lottie.json",
+                        //   controller: _playPauseController,
+                        //   width: 200,
+                        //   height: 200,
+                        //   // onLoaded : 개발자가 의도하는 애니메이션 성질을 반영(필요 시)
+                        //   // _반영안해도 무관
+                        //   onLoaded: (composition) {
+                        //     _playPauseController.duration = composition.duration;
+                        //   },
+                        // ),
                       ],
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Interstellar",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 5),
-              SlideTransition(
-                position: _marqueeTween,
-                child: const Text(
-                  "A Film By Christopher Nolan - Original Motion Picture Soundtrack",
-                  maxLines: 1,
-                  // TextOverflow.visible : Container를 벗어나는 경우도 표시
-                  overflow: TextOverflow.visible,
-                  // softWrap: 텍스트가 영역을 넘어갈 경우 줄바꿈 여부
-                  softWrap: false,
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              const SizedBox(height: 30),
-              GestureDetector(
-                onTap: _onPlayPauseTap,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedIcon(
-                      icon: AnimatedIcons.play_pause,
-                      progress: _playPauseController,
-                      size: 80,
-                    ),
-                    // LottieBuilder.asset(
-                    //   "assets/animations/play-lottie.json",
-                    //   controller: _playPauseController,
-                    //   width: 200,
-                    //   height: 200,
-                    //   // onLoaded : 개발자가 의도하는 애니메이션 성질을 반영(필요 시)
-                    //   // _반영안해도 무관
-                    //   onLoaded: (composition) {
-                    //     _playPauseController.duration = composition.duration;
-                    //   },
-                    // ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-              GestureDetector(
-                onHorizontalDragUpdate: _onVolumeDragUpdate,
-                onHorizontalDragStart: (_) => _toggleDragging(),
-                onHorizontalDragEnd: (_) => _toggleDragging(),
-                child: AnimatedScale(
-                  scale: _dragging ? 1.1 : 1,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.bounceOut,
-                  child: Container(
-                    clipBehavior: Clip.hardEdge,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                    child: ValueListenableBuilder(
-                      valueListenable: _volume,
-                      builder: (context, value, child) => CustomPaint(
-                        size: Size(size.width - 80, 50),
-                        painter: VolumePainter(volume: value),
-                      ),
                     ),
                   ),
-                ),
-              )
-            ],
+                  const SizedBox(height: 30),
+                  GestureDetector(
+                    onHorizontalDragUpdate: _onVolumeDragUpdate,
+                    onHorizontalDragStart: (_) => _toggleDragging(),
+                    onHorizontalDragEnd: (_) => _toggleDragging(),
+                    child: AnimatedScale(
+                      scale: _dragging ? 1.1 : 1,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.bounceOut,
+                      child: Container(
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ValueListenableBuilder(
+                          valueListenable: _volume,
+                          builder: (context, value, child) => CustomPaint(
+                            size: Size(size.width - 80, 50),
+                            painter: VolumePainter(volume: value),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ],
