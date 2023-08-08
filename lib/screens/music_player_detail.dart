@@ -106,16 +106,6 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
       ),
   ];
 
-  late final Animation<Offset> _profileSlide = Tween<Offset>(
-    begin: const Offset(-1, 0),
-    end: Offset.zero,
-  ).animate(
-    CurvedAnimation(
-      parent: _menuController,
-      curve: Interval(0.4, 0.7, curve: _menuCurve),
-    ),
-  );
-
   late final Animation<Offset> _logoutSlide = Tween<Offset>(
     begin: const Offset(-1, 0),
     end: Offset.zero,
@@ -226,55 +216,58 @@ class _MusicPlayerDetailScreenState extends State<MusicPlayerDetailScreen>
               ),
             ),
           ),
-          body: Column(
-            children: [
-              const SizedBox(height: 30),
-              for (var i = 0; i < _menus.length; i++) ...[
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                for (var i = 0; i < _menus.length; i++) ...[
+                  SlideTransition(
+                    position: _menusAnimations[i],
+                    child: Row(
+                      children: [
+                        Icon(
+                          _menus[i]["icon"],
+                          color: Colors.grey.shade200,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          _menus[i]["text"],
+                          style: TextStyle(
+                            color: Colors.grey.shade200,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                ],
+                const Spacer(),
                 SlideTransition(
-                  position: _menusAnimations[i],
-                  child: Row(
+                  position: _logoutSlide,
+                  child: const Row(
                     children: [
                       Icon(
-                        _menus[i]["icon"],
-                        color: Colors.grey.shade200,
+                        Icons.logout,
+                        color: Colors.red,
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10),
                       Text(
-                        _menus[i]["text"],
+                        "Log out",
                         style: TextStyle(
-                          color: Colors.grey.shade200,
+                          color: Colors.red,
                           fontSize: 18,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
+                const SizedBox(height: 100),
               ],
-              const Spacer(),
-              SlideTransition(
-                position: _logoutSlide,
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.logout,
-                      color: Colors.red,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      "Log out",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 100),
-            ],
+            ),
           ),
         ),
         SlideTransition(
