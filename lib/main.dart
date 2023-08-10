@@ -14,6 +14,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Animations',
       theme: ThemeData(
+        navigationBarTheme: const NavigationBarThemeData(
+          indicatorColor: Colors.amber,
+        ),
         colorScheme: const ColorScheme.light(
           primary: Colors.blue,
         ),
