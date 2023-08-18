@@ -8,6 +8,7 @@ import 'package:flutter_animations/screens/music_player.screen.dart';
 import 'package:flutter_animations/screens/rive_screen.dart';
 import 'package:flutter_animations/screens/share_axis_screen.dart';
 import 'package:flutter_animations/screens/swiping_cards_screen.dart';
+import 'package:flutter_animations/screens/wallet_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -109,6 +110,15 @@ class MenuScreen extends StatelessWidget {
                 );
               },
               child: const Text("Fade Through"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _goToPage(
+                  context,
+                  const WalletScreen(),
+                );
+              },
+              child: const Text("Wallet"),
             ),
           ],
         ),
