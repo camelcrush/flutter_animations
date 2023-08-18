@@ -54,7 +54,10 @@ class _WalletScreenState extends State<WalletScreen> {
             //   ],
             // ),
             children: [
-              const CreditCard(bgColor: Colors.purple)
+              CreditCard(
+                bgColor: Colors.purple,
+                isExpanded: _isExpanded,
+              )
                   .animate(
                     // 애니메이션 목표치에 대해 0~1 사이
                     target: _isExpanded ? 0 : 1,
@@ -63,7 +66,10 @@ class _WalletScreenState extends State<WalletScreen> {
                   .flipV(
                     end: 0.1,
                   ),
-              const CreditCard(bgColor: Colors.black)
+              CreditCard(
+                bgColor: Colors.black,
+                isExpanded: _isExpanded,
+              )
                   .animate(
                     target: _isExpanded ? 0 : 1,
                     delay: 1.5.seconds,
@@ -74,7 +80,10 @@ class _WalletScreenState extends State<WalletScreen> {
                   .slideY(
                     end: -0.8,
                   ),
-              const CreditCard(bgColor: Colors.blue)
+              CreditCard(
+                bgColor: Colors.blue,
+                isExpanded: _isExpanded,
+              )
                   .animate(
                     target: _isExpanded ? 0 : 1,
                     delay: 1.5.seconds,
@@ -103,82 +112,95 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 }
 
+void _onTap() {
+  print("hello");
+}
+
 class CreditCard extends StatelessWidget {
   final Color bgColor;
+  final bool isExpanded;
 
   const CreditCard({
     super.key,
     required this.bgColor,
+    required this.isExpanded,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: bgColor,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 30,
-          vertical: 40,
-        ),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 80,
+    // AbsorbPointer : GestureDetector 중첩현상 해결
+    return AbsorbPointer(
+      absorbing: !isExpanded,
+      child: GestureDetector(
+        onTap: _onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: bgColor,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 30,
+              vertical: 40,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Camel Crush",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                    Text(
-                      "**** **** **99",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                const SizedBox(
+                  height: 80,
                 ),
-                Stack(
-                  clipBehavior: Clip.none,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Positioned(
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Camel Crush",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
+                        Text(
+                          "**** **** **99",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      right: 20,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.amber,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.red,
+                            ),
+                          ),
                         ),
-                      ),
+                        Positioned(
+                          right: 20,
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        )
+                      ],
                     )
                   ],
                 )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );
